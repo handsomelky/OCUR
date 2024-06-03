@@ -1,0 +1,11 @@
+PatchManagerPage,#view {
+    background-color: transparent;
+}
+
+QScrollArea {
+    border: none;
+}
+
+QLabel {
+    color: white;
+}

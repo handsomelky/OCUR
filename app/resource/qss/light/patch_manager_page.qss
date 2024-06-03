@@ -1,0 +1,13 @@
+PatchManagerPage,#view {
+    background-color: transparent;
+}
+
+QScrollArea {
+    border: none;
+}
+
+TableWidget {
+    background-color: rgb(240, 240, 240);
+    border: 1px solid rgb(200, 200, 200);
+    border-radius: 10px;
+}

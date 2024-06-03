@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   viewBox="0.0 0.0 960.0 720.0"
+   fill="none"
+   stroke="none"
+   stroke-linecap="square"
+   stroke-miterlimit="10"
+   id="svg83"
+   sodipodi:docname="EasyOCR_OSS3.svg"
+   inkscape:version="1.0.2 (1.0.2+r75+1)">
+  <metadata
+     id="metadata89">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs87" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="948"
+     id="namedview85"
+     showgrid="false"
+     inkscape:zoom="1.1027778"
+     inkscape:cx="480"
+     inkscape:cy="360"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g81" />
+  <clipPath
+     id="p.0">
+    <path
+       d="m0 0l960.0 0l0 720.0l-960.0 0l0 -720.0z"
+       clip-rule="nonzero"
+       id="path2" />
+  </clipPath>
+  <g
+     clip-path="url(#p.0)"
+     id="g81">
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m0 0l960.0 0l0 720.0l-960.0 0z"
+       fill-rule="evenodd"
+       id="path5" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m449.67453 168.84514l295.68503 -4.377945"
+       fill-rule="evenodd"
+       id="path7" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m449.67453 168.84514l295.68503 -4.377945"
+       fill-rule="evenodd"
+       id="path9" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m398.4882 217.07742l373.13388 -2.8661346"
+       fill-rule="evenodd"
+       id="path11" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m398.4882 217.07742l373.13388 -2.8661346"
+       fill-rule="evenodd"
+       id="path13"
+       style="stroke:#00b4b4;stroke-opacity:0.60000002" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m383.86877 264.71127l368.5039 -2.2677002"
+       fill-rule="evenodd"
+       id="path15" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m383.86877 264.71127l368.5039 -2.2677002"
+       fill-rule="evenodd"
+       id="path17"
+       style="stroke:#00b4b4;stroke-opacity:0.40000001" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m370.49344 316.58005l374.01578 0.62991333"
+       fill-rule="evenodd"
+       id="path19" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m370.49344 316.58005l374.01578 0.62991333"
+       fill-rule="evenodd"
+       id="path21"
+       style="stroke:#00b4b4;stroke-opacity:0.2" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m358.89764 368.44882l374.01575 0.62991333"
+       fill-rule="evenodd"
+       id="path23" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m358.89764 368.44882l374.01575 0.62991333"
+       fill-rule="evenodd"
+       id="path25"
+       style="stroke:#00b4b4;stroke-opacity:0.2" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m339.13647 420.3176l374.01575 0.62991333"
+       fill-rule="evenodd"
+       id="path27" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m339.13647 420.3176l374.01575 0.62991333"
+       fill-rule="evenodd"
+       id="path29"
+       style="stroke:#00b4b4;stroke-opacity:0.40000001" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m330.6404 472.18634l374.01578 0.62994385"
+       fill-rule="evenodd"
+       id="path31" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m330.6404 472.18634l374.01578 0.62994385"
+       fill-rule="evenodd"
+       id="path33"
+       style="stroke:#00b4b4;stroke-opacity:0.60000002" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m319.51968 524.0551l374.01578 0.62994385"
+       fill-rule="evenodd"
+       id="path35" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m319.51968 524.0551l374.01578 0.62994385"
+       fill-rule="evenodd"
+       id="path37"
+       style="stroke:#00b4b4;stroke-opacity:0.80000001" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m535.7297 575.9239l146.64563 -0.28344727"
+       fill-rule="evenodd"
+       id="path39" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="12.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m535.7297 575.9239l146.64563 -0.28344727"
+       fill-rule="evenodd"
+       id="path41" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m375.73227 215.19423l340.34647 0l0 290.86615l-340.34647 0z"
+       fill-rule="evenodd"
+       id="path43" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m330.6929 227.45932l36.724426 -134.74016"
+       fill-rule="evenodd"
+       id="path49" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="24.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m330.6929 227.45932l36.724426 -134.74016"
+       fill-rule="evenodd"
+       id="path51" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m358.89764 101.73491l131.24408 -1.7637787"
+       fill-rule="evenodd"
+       id="path53" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="24.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m358.89764 101.73491l131.24408 -1.7637787"
+       fill-rule="evenodd"
+       id="path55" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m826.7664 218.59317l32.346436 -127.62204"
+       fill-rule="evenodd"
+       id="path57" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m723.3832 99.98688l139.9685 1.7322845"
+       fill-rule="evenodd"
+       id="path61" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m265.04462 513.43304l-32.34645 127.62207"
+       fill-rule="evenodd"
+       id="path65" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m368.42783 632.03937l-139.9685 -1.7322998"
+       fill-rule="evenodd"
+       id="path69" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m757.8845 508.41208l-36.724426 134.74014"
+       fill-rule="evenodd"
+       id="path73" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="24.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m757.8845 508.41208l-36.724426 134.74014"
+       fill-rule="evenodd"
+       id="path75" />
+    <path
+       fill="#000000"
+       fill-opacity="0.0"
+       d="m729.6798 634.1365l-131.24414 1.763794"
+       fill-rule="evenodd"
+       id="path77" />
+    <path
+       stroke="#00b4b4"
+       stroke-width="24.0"
+       stroke-linejoin="round"
+       stroke-linecap="butt"
+       d="m729.6798 634.1365l-131.24414 1.763794"
+       fill-rule="evenodd"
+       id="path79" />
+    <path
+       style="fill:none;stroke:#00b4b4;stroke-width:23;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+       d="M 712.68459,96.686237 871.02564,96.020521 834.02346,232.71805"
+       id="path914"
+       sodipodi:nodetypes="ccc" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#00b4b4;stroke-width:23;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1"
+       d="m 387.50694,640.29022 -167.675,0.10549 34.98827,-129.73348"
+       id="path916"
+       sodipodi:nodetypes="ccc" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:122.667px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none"
+       x="544.34534"
+       y="314.38464"
+       id="text924"><tspan
+         sodipodi:role="line"
+         id="tspan922"
+         x="544.34534"
+         y="314.38464"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:122.667px;font-family:Kinnari;-inkscape-font-specification:'Kinnari Bold';text-align:center;text-anchor:middle;fill:#0067a5;fill-opacity:1">Easy</tspan><tspan
+         sodipodi:role="line"
+         x="544.34534"
+         y="472.65338"
+         id="tspan926"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:122.667px;font-family:Kinnari;-inkscape-font-specification:'Kinnari Bold';text-align:center;text-anchor:middle;fill:#0067a5;fill-opacity:1">OCR</tspan></text>
+  </g>
+</svg>

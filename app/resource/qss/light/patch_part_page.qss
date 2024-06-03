@@ -1,0 +1,32 @@
+#dropCover {
+    background-color: rgb(255, 255, 255);
+    border-radius: 10px;
+    font-size: 24px;
+}
+
+#progressCover {
+    background-color: rgb(255, 255, 255);
+}
+
+
+#textArea {
+    background-color: white;
+    border-left: 1px solid rgb(229, 229, 229);
+    border-radius: 10px;
+    
+}
+
+#picArea {
+    background-color: rgb(245, 245, 245);
+    border-radius: 10px;
+}
+
+
+
+PatchPartPage,#view {
+    background-color: transparent;
+}
+
+QScrollArea {
+    border: none;
+}
