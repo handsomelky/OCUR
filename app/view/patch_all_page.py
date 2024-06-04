@@ -358,7 +358,7 @@ class VisualizationArea(QWidget):
                 parent=self
             )
             return
-        file_filter = "Image Files (*.jpg *.jpeg *.png)"
+        file_filter = "Image Files (*.jpg *.jpeg *.png *.webp)"
         file_paths, _ = QFileDialog.getOpenFileNames(self, "Select Files", "", file_filter)
         if file_paths:
             for file_path in file_paths:
@@ -832,9 +832,9 @@ class VisualizationArea(QWidget):
                 patched_marked.append(patched_text[p_start:p_end])
 
         # 组合标记后的结果
-        patched_text = ''.join(patched_marked)
+        patched_marked = ''.join(patched_marked)
 
-        self.ocrResult.emit([original_text, patched_text])
+        self.ocrResult.emit([original_text, patched_marked, patched_text])
 
 
 class ProtectArea(QWidget):
@@ -1111,6 +1111,7 @@ class OCRResultsArea(QWidget):
 
         self.ocrLabel1 = QLabel(self.tr('OCR Results for Original Image'), self)
         self.ocrText1 = TextEdit(self)
+        self.exportButton1 = PushButton(self.tr('Export Results'), self)
 
         self.arrowIcon = IconWidget(FIF.RIGHT_ARROW, self)
 
@@ -1119,8 +1120,11 @@ class OCRResultsArea(QWidget):
 
         self.ocrLabel2 = QLabel(self.tr('OCR Results for Patched Image'), self)
         self.ocrText2 = TextEdit(self)
+        self.exportButton2 = PushButton(self.tr('Export Results'), self)
 
-       
+        self.rawText1 = ''
+        self.rawText2 = ''
+
         self.__initWidget()
 
     def __initWidget(self):
@@ -1129,23 +1133,44 @@ class OCRResultsArea(QWidget):
         self.ocrLabel1.setFont(QFont('Arial', 12))
         self.ocrLabel2.setFont(QFont('Arial', 12))
 
+        self.connectSignalToSlot()
+
+    def connectSignalToSlot(self):
+
+        self.exportButton1.clicked.connect(lambda: self.export_result(self.rawText1, 'original'))
+        self.exportButton2.clicked.connect(lambda: self.export_result(self.rawText2, 'patched'))
+
+
     def initLayout(self):
         self.ocrLayout1.addWidget(self.ocrLabel1)
         self.ocrLayout1.addWidget(self.ocrText1)
+        self.ocrLayout1.addWidget(self.exportButton1)
         self.hBoxLayout.addWidget(self.ocrArea1)
 
         self.hBoxLayout.addWidget(self.arrowIcon)
 
         self.ocrLayout2.addWidget(self.ocrLabel2)
         self.ocrLayout2.addWidget(self.ocrText2)
+        self.ocrLayout2.addWidget(self.exportButton2)
         self.hBoxLayout.addWidget(self.ocrArea2)
 
         self.setMaximumHeight(0)
 
     def show_result(self, ocr_result):
 
+        self.rawText1 = ocr_result[0]
+        self.rawText2 = ocr_result[2]
+
         self.ocrText1.setMarkdown(ocr_result[0])
         self.ocrText2.setMarkdown(ocr_result[1])
+
+    def export_result(self, text, type):
+        # Function to save the text to a file
+        options = QFileDialog.Options()
+        fileName, _ = QFileDialog.getSaveFileName(self, f"Save OCR Results - {type}", "", "Text Files (*.txt);;All Files (*)", options=options)
+        if fileName:
+            with open(fileName, 'w', encoding='utf-8') as file:
+                file.write(text)
 
 class ChartArea(QWidget):
     def __init__(self, parent=None):
@@ -1279,9 +1304,10 @@ class CustomMessageBox(MessageBoxBase):
         self.cancelButton.setText(self.tr('Cancel'))
 
         self.formatButton.addItems([
+            '使用原图格式',
             'jpg',
             'png',
-            '使用原图格式'
+            'webp'
         ])
 
         self.saveProgress.setTextVisible(True)

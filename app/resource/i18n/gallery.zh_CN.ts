@@ -162,8 +162,8 @@
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="119"/>
-        <source>Discover new features and learn useful tips about PyQt-Fluent-Widgets</source>
-        <translation>发现新功能并了解有关 PyQt-Fluent-Widgets 的使用技巧</translation>
+        <source>Discover new features and learn useful tips about OCUR</source>
+        <translation>发现新功能并了解有关 OCUR 的使用技巧</translation>
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="128"/>
@@ -172,8 +172,8 @@
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="128"/>
-        <source>Help us improve PyQt-Fluent-Widgets by providing feedback</source>
-        <translation>通过提供反馈帮助我们改进 PyQt-Fluent-Widgets</translation>
+        <source>Help us improve OCUR by providing feedback</source>
+        <translation>通过提供反馈帮助我们改进 OCUR</translation>
     </message>
     <message>
         <location filename="../../view/setting_interface.py" line="135"/>
@@ -331,11 +331,6 @@
         <location filename="../../view/patch_manager_page.py" line="27"/>
         <source>Select Train Dataset Directory</source>
         <translation>选择训练集目录</translation>
-    </message>
-    <message>
-        <location filename="../../view/patch_manager_page.py" line="27"/>
-        <source>Export</source>
-        <translation>导出</translation>
     </message>
 </context>
 <context>
@@ -553,6 +548,11 @@
         <location filename="../../view/patch_all_page.py" line="27"/>
         <source>OCR Results for Patched Image</source>
         <translation>底纹图OCR识别结果</translation>
+    </message>
+    <message>
+        <location filename="../../view/patch_all_page.py" line="109"/>
+        <source>Export Results</source>
+        <translation>导出结果</translation>
     </message>
 </context>
 <context>

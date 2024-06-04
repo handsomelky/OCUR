@@ -40,7 +40,7 @@ class SettingInterface(ScrollArea):
             Icon.PORT,
             self.tr('Service Port'),
             self.tr('Set the port for the service'),
-            '{your default backend's port}',
+            "{your default backend's port}",
             cfg.servicePort,
             parent=self.networkGroup
         )
@@ -123,14 +123,14 @@ class SettingInterface(ScrollArea):
             FIF.HELP,
             self.tr('Help'),
             self.tr(
-                'Discover new features and learn useful tips about PyQt-Fluent-Widgets'),
+                'Discover new features and learn useful tips about OCUR'),
             self.aboutGroup
         )
         self.feedbackCard = PrimaryPushSettingCard(
             self.tr('Provide feedback'),
             FIF.FEEDBACK,
             self.tr('Provide feedback'),
-            self.tr('Help us improve PyQt-Fluent-Widgets by providing feedback'),
+            self.tr('Help us improve OCUR by providing feedback'),
             self.aboutGroup
         )
         self.aboutCard = PrimaryPushSettingCard(

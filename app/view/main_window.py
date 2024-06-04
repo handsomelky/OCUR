@@ -15,7 +15,7 @@ from .patch_all_page import PatchAllPage
 from .patch_part_page import PatchPartPage
 from .patch_manager_page import PatchManagerPage
 from .setting_interface import SettingInterface
-from ..common.config import ZH_SUPPORT_URL, EN_SUPPORT_URL, cfg
+from ..common.config import  cfg
 from ..common.icon import Icon
 from ..common.signal_bus import signalBus
 from ..common.translator import Translator
@@ -56,7 +56,6 @@ class MainWindow(FluentWindow):
     def connectSignalToSlot(self):
         signalBus.micaEnableChanged.connect(self.setMicaEffectEnabled)
         signalBus.switchToSampleCard.connect(self.switchToSample)
-        signalBus.supportSignal.connect(self.onSupport)
 
     def handleMode(self):
         interfaces = self.findChildren(ScrollArea)
@@ -82,15 +81,7 @@ class MainWindow(FluentWindow):
         self.navigationInterface.addSeparator()
 
         # add custom widget to bottom
-        self.navigationInterface.addItem(
-            routeKey='price',
-            icon=Icon.PRICE,
-            text=t.price,
-            onClick=self.onSupport,
-            selectable=False,
-            tooltip=t.price,
-            position=NavigationItemPosition.BOTTOM
-        )
+
         self.addSubInterface(
             self.settingInterface, FIF.SETTING, self.tr('Settings'), NavigationItemPosition.BOTTOM)
 
@@ -112,13 +103,6 @@ class MainWindow(FluentWindow):
         self.move(w//2 - self.width()//2, h//2 - self.height()//2)
         self.show()
         QApplication.processEvents()
-
-    def onSupport(self):
-        language = cfg.get(cfg.language).value
-        if language.name() == "zh_CN":
-            QDesktopServices.openUrl(QUrl(ZH_SUPPORT_URL))
-        else:
-            QDesktopServices.openUrl(QUrl(EN_SUPPORT_URL))
 
     def resizeEvent(self, e):
         super().resizeEvent(e)
