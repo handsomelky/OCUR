@@ -1,6 +1,6 @@
-from PySide6.QtCore import QModelIndex, Qt, QObject, QEvent, Signal, QTimer, QSize, QPropertyAnimation, QEasingCurve, QUrl
-from PySide6.QtGui import QPainter, QColor, QPixmap, QPen, QIcon, QFont
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFileDialog, QFrame, QGraphicsView, QListWidgetItem, QLabel, QGraphicsPixmapItem, QGraphicsScene, QScrollArea, QCompleter
+from PySide6.QtCore import QModelIndex, Qt, QObject, QEvent, Signal, QTimer, QSize, QPropertyAnimation, QEasingCurve, QRectF
+from PySide6.QtGui import QPaintEngine, QPaintEvent, QPainter, QColor, QPixmap, QPen, QIcon, QFont, QMouseEvent
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFileDialog, QFrame, QGraphicsView, QListWidgetItem, QLabel, QGraphicsPixmapItem , QGraphicsRectItem
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from pyecharts.charts import Radar, Pie
@@ -20,7 +20,7 @@ from ..components.sample_card import SampleCardView
 from ..common.style_sheet import StyleSheet
 from ..common.signal_bus import signalBus
 
-from ..components.graph_scene import GraphScene,GraphicsImageItem, GraphicsPolygonItem
+from ..components.graph_scene import GraphScene,GraphicsImageItem, GraphicsPolygonItem, GraphicsView
 
 from ..api.patch import PatchThread
 from ..api.evaluate import EvaluateThread
@@ -33,7 +33,7 @@ class ImageViewer(QWidget):
     def __init__(self, parent=None, base_path=None):
         super().__init__(parent)
         self.picScene = GraphScene()
-        self.view = QGraphicsView(self.picScene, self)
+        self.view = GraphicsView(self.picScene, self)
 
         self.view.setScene(self.picScene)
 
@@ -52,6 +52,9 @@ class ImageViewer(QWidget):
         self.min_scale = 0.4  # 最小缩放级别
         self.pixmap = None
 
+        signalBus.repaintSignal.connect(self.view.viewport().update)  # 连接重绘信号
+        self.setMouseTracking(True) 
+        self.view.setMouseTracking(True)  # 设置鼠标跟踪
         
 
     def zoom_in(self):
@@ -72,8 +75,9 @@ class ImageViewer(QWidget):
             self.view.setDragMode(QGraphicsView.ScrollHandDrag)
         else:
             self.view.setDragMode(QGraphicsView.NoDrag)
+    
 
-
+    
 class InteractiveDropCover(QLabel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -141,11 +145,11 @@ class VisualizationArea(QWidget):
     applyPatch = Signal()
     patchProgressUpdated = Signal(int)
     barchartExpand = Signal(bool)
-    updateChart = Signal(dict)
     enableButtons = Signal()
     saveornot = Signal(bool)
     ocrResult = Signal(list)
     ocrResultExpand = Signal(bool)
+    disableButtons = Signal()
 
     def __init__(self, parent=None, base_path=None):
         super().__init__(parent=parent)
@@ -158,7 +162,9 @@ class VisualizationArea(QWidget):
         self.patchedState = False
         self.alreadyPatched = False
         self.evaluatedState = False
+        self.viewReady = False
         self.selectRects = []
+        self.itemToGraphicsItem = []
 
         self.patched_dir = os.path.join(base_path, 'results/patched_image_part')
         self.evaluated_upload_dir = os.path.join(base_path, 'results/evaluated_upload_image_part')
@@ -179,6 +185,8 @@ class VisualizationArea(QWidget):
         self.dargButton = TransparentToggleToolButton(FIF.MOVE, self.imageBar)
         self.zoomInButton = TransparentToolButton(FIF.ZOOM_IN, self.imageBar)
         self.zoomOutButton = TransparentToolButton(FIF.ZOOM_OUT, self.imageBar)
+        self.selectButton = TransparentToggleToolButton(FIF.ADD, self.imageBar)
+        self.clearButton = TransparentToggleToolButton(FIF.REMOVE, self.imageBar)
         self.switchButton = ToggleButton(self.tr('Switch to Patched Image'),self.imageBar)
         self.restoreButton = PrimaryPushButton(FIF.HISTORY,self.tr('Restore to Original Image'), self.imageBar)
         
@@ -204,6 +212,8 @@ class VisualizationArea(QWidget):
         self.dargButton.installEventFilter(ToolTipFilter(self.dargButton))
         self.zoomInButton.installEventFilter(ToolTipFilter(self.zoomInButton))
         self.zoomOutButton.installEventFilter(ToolTipFilter(self.zoomOutButton))
+        self.selectButton.installEventFilter(ToolTipFilter(self.selectButton))
+        self.clearButton.installEventFilter(ToolTipFilter(self.clearButton))
         self.switchButton.installEventFilter(ToolTipFilter(self.switchButton))
         self.restoreButton.installEventFilter(ToolTipFilter(self.restoreButton))
         
@@ -212,6 +222,8 @@ class VisualizationArea(QWidget):
         self.dargButton.setToolTip('Drag Mode')
         self.zoomInButton.setToolTip('Zoom In')
         self.zoomOutButton.setToolTip('Zoom Out')
+        self.selectButton.setToolTip('Select Mode')
+        self.clearButton.setToolTip('Clear Mode')
         self.switchButton.setToolTip('Switch to Patched Image')
         self.restoreButton.setToolTip('Restore to Original Image')
         
@@ -240,6 +252,10 @@ class VisualizationArea(QWidget):
         self.zoomInButton.clicked.connect(self.viewer.zoom_in)
         self.zoomOutButton.clicked.connect(self.viewer.zoom_out)
         self.dargButton.toggled.connect(self.viewer.set_drag_mode)
+        self.selectButton.toggled.connect(self.viewer.view.set_selection_mode)
+        self.clearButton.toggled.connect(self.viewer.view.set_clear_mode)
+        self.selectButton.toggled.connect(self.toggleClearButton)
+        self.clearButton.toggled.connect(self.toggleSelectButton)
 
         self.switchButton.toggled.connect(self.switch_image)
         
@@ -250,6 +266,7 @@ class VisualizationArea(QWidget):
         self.patchProgressUpdated.connect(self.progressCover.progressRing.setValue)
 
         self.restoreButton.clicked.connect(self.restore_image)
+
         
         
     def initLayout(self):
@@ -259,6 +276,8 @@ class VisualizationArea(QWidget):
         self.imageBar.addWidget(self.dargButton)
         self.imageBar.addWidget(self.zoomInButton)
         self.imageBar.addWidget(self.zoomOutButton)
+        self.imageBar.addWidget(self.selectButton)
+        self.imageBar.addWidget(self.clearButton)
         self.imageBar.addWidget(self.switchButton)
         self.imageBar.addWidget(self.restoreButton)
         
@@ -277,6 +296,13 @@ class VisualizationArea(QWidget):
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     
+    def toggleSelectButton(self, checked):
+        if checked:
+            self.selectButton.setChecked(False)
+
+    def toggleClearButton(self, checked):
+        if checked:
+            self.clearButton.setChecked(False)
 
     def resizeEvent(self, event):
         self.dropCover.setGeometry(self.rect())
@@ -285,6 +311,10 @@ class VisualizationArea(QWidget):
     
     def restore_image(self):
         self.alreadyPatched = False
+        self.viewer.view.rectangles = []
+        self.selectRects = []
+        self.selectButton.setEnabled(True)
+        self.clearButton.setEnabled(True)
         self.display_image('paddleocr')
 
     def emitApplyPatchSignal(self):
@@ -359,16 +389,20 @@ class VisualizationArea(QWidget):
         """
         更新图片和识别信息
         """
-
+        self.viewReady = False
         # 清空当前所有图元
         self.viewer.picScene.clear()
+        self.itemToGraphicsItem.clear()
         if not self.alreadyPatched:
             self.currentRecognitions = recognitions
         # 添加图片
         self.imageItem = GraphicsImageItem(image_file, self.viewer.picScene)
         # 添加框
         for index, item in enumerate(recognitions):
-            GraphicsPolygonItem(item, index, self.viewer.picScene, self.textList)
+            polygonItem = GraphicsPolygonItem(item, index, self.viewer.picScene, self.textList)
+            self.itemToGraphicsItem.append(polygonItem)
+        
+        self.viewReady = True
 
         self.viewer.view.setSceneRect(self.imageItem.boundingRect())  # 确保场景大小匹配图像大小
         self.viewer.view.fitInView(self.imageItem, Qt.KeepAspectRatio)
@@ -384,7 +418,6 @@ class VisualizationArea(QWidget):
             item = QListWidgetItem(self.textList)
             item.setTextAlignment(Qt.AlignVCenter | Qt.AlignLeft)
             item.setText(text)
-            item
             item.setCheckState(Qt.CheckState.Unchecked)
             self.textList.indexFromItem
             self.textList.addItem(item)
@@ -393,6 +426,16 @@ class VisualizationArea(QWidget):
 
         any_checked = any(item.checkState() == Qt.Checked for i in range(self.textList.count()) for item in [self.textList.item(i)])
         self.patchCheckedButton.setVisible(any_checked)
+
+        if not self.viewReady:
+            return
+        index = self.textList.row(item) 
+        graphic_item = self.itemToGraphicsItem[index]
+
+        if item.checkState() == Qt.Checked:
+            graphic_item.set_brush(True)
+        else:
+            graphic_item.set_brush(False)
 
     def clear_images(self):
         self.dropCover.show()
@@ -405,6 +448,12 @@ class VisualizationArea(QWidget):
         self.switchButton.setEnabled(False)
         self.evaluatedState = False
         self.alreadyPatched = False
+        self.viewer.view.rectangles = []
+        self.selectButton.setChecked(False)
+        self.clearButton.setChecked(False)
+        self.selectButton.setEnabled(True)
+        self.clearButton.setEnabled(True)
+        self.selectRects = []
 
         patched_dir = self.patched_dir
         if os.path.exists(patched_dir):
@@ -434,6 +483,8 @@ class VisualizationArea(QWidget):
     
     def display_image(self, model='paddleocr'):
 
+        self.disableButtons.emit()
+
         self.evaluate(model = model)
         self.patchCheckedButton.setVisible(False)
 
@@ -460,6 +511,7 @@ class VisualizationArea(QWidget):
         if not self.alreadyPatched:
             self.selectRects = []
         
+
         if self.upload_file == None:
             InfoBar.error(
                 title=self.tr('Error'),
@@ -481,9 +533,24 @@ class VisualizationArea(QWidget):
                 for coordinate in bbox:
                     for i in range(len(coordinate)):
                         coordinate[i] = int(coordinate[i])
+                print(bbox)
                 self.selectRects.append(bbox)
-        
-    
+
+        if len(self.viewer.view.rectangles) != 0:
+            for rect in self.viewer.view.rectangles:
+                r = rect.rect()
+                # 生成四个角的坐标
+                corners = [
+                    (int(r.x()), int(r.y())),
+                    (int(r.x() + r.width()), int(r.y())),
+                    (int(r.x() + r.width()), int(r.y() + r.height())),
+                    (int(r.x()), int(r.y() + r.height()))
+                ]
+                self.selectRects.append(corners)
+        self.selectButton.setChecked(False)
+        self.clearButton.setChecked(False)
+        self.selectButton.setEnabled(False)
+        self.clearButton.setEnabled(False)
         self.stateTooltip = StateToolTip(
             self.tr('Patching'), self.tr('Please wait'), self.window())
         self.stateTooltip.move(self.stateTooltip.getSuitablePos())
@@ -557,9 +624,9 @@ class VisualizationArea(QWidget):
 
             bboxs = patched_image_result["bbox"]
             texts = patched_image_result["texts"]
-
-            self.updateView(bboxs, self.patched_dir+'/'+result[0]["image_name"])
             self.updateText(texts)
+            self.updateView(bboxs, self.patched_dir+'/'+result[0]["image_name"])
+            
 
             self.show_OCR(result[0])
             self.ocrResultExpand.emit(True)
@@ -567,9 +634,9 @@ class VisualizationArea(QWidget):
         else:
             bboxs = result["ocr_result_clean"]["bbox"]
             texts = result["ocr_result_clean"]["texts"]
-            self.updateView(bboxs, self.upload_file)
             self.updateText(texts)
-
+            self.updateView(bboxs, self.upload_file)
+            
         self.textList.setCurrentRow(0)
         self.update_list_height()
         QTimer.singleShot(1000, self.progressCover.hide)
@@ -1094,6 +1161,7 @@ class PatchPartPage(ScrollArea):
         self.protectionArea.applyPatch.connect(self.visualizationArea.apply_patch)
         self.protectionArea.evaluate.connect(self.visualizationArea.evaluate)
 
+        self.visualizationArea.disableButtons.connect(self.protectionArea.disableUI)
         self.visualizationArea.enableButtons.connect(self.protectionArea.enableUI)
         self.visualizationArea.saveornot.connect(self.protectionArea.savePatchButton.setEnabled)
         self.visualizationArea.applyPatch.connect(self.protectionArea.emitApplyPatchSignal)

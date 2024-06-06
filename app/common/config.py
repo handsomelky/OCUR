@@ -53,13 +53,12 @@ class Config(QConfig):
 YEAR = 2024
 AUTHOR = "R1ck"
 VERSION = __version__
-HELP_URL = "https://qfluentwidgets.com"
-REPO_URL = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets"
-EXAMPLE_URL = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/tree/PySide6/examples"
-FEEDBACK_URL = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/issues"
-RELEASE_URL = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/releases/latest"
-ZH_SUPPORT_URL = "https://qfluentwidgets.com/zh/price/"
-EN_SUPPORT_URL = "https://qfluentwidgets.com/price/"
+HELP_URL = "http://119.91.40.61/"
+REPO_URL = "https://github.com/handsomelky/OCUR"
+EXAMPLE_URL = "http://119.91.40.61/guide/"
+FEEDBACK_URL = "https://github.com/handsomelky/OCUR/issues"
+RELEASE_URL = "https://github.com/handsomelky/OCUR/releases"
+
 
 
 cfg = Config()

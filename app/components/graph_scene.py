@@ -1,10 +1,11 @@
 import random
 import math
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItem, QGraphicsPolygonItem, QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QStyle
-from PySide6.QtGui import QPixmap, QPolygon, QPen, QColor, QBrush
-from PySide6.QtCore import QPoint, Qt
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsPixmapItem, QGraphicsItem, QGraphicsPolygonItem, QGraphicsView,QGraphicsSceneHoverEvent, QGraphicsSceneMouseEvent, QStyle, QGraphicsRectItem
+from PySide6.QtGui import QPixmap, QPolygon, QPen, QColor, QMouseEvent
+from PySide6.QtCore import QPoint, Qt, QRectF
 
 from qfluentwidgets import ListWidget
+from ..common.signal_bus import signalBus
 
 class GraphScene(QGraphicsScene):
     """
@@ -13,6 +14,58 @@ class GraphScene(QGraphicsScene):
     def __init__(self):
         super().__init__()
 
+    
+class GraphicsView(QGraphicsView):
+
+    def __init__(self, scene, parent):
+        super().__init__()
+
+        self.selectionMode = False
+        self.clearMode = False  # 新增一个清除模式标志
+        self.rectangles = []  # 用于存储所有矩形
+        self.startPoint = None
+        self.currentRect = None
+        self.picScene = scene
+
+        self.BOX_COLORS = [(82, 85, 255), (255, 130, 80), (240, 70, 255), (255, 255, 19), (30, 255, 30)]
+        
+
+    def set_selection_mode(self, enabled):
+        self.selectionMode = enabled
+
+    def set_clear_mode(self, enabled):
+        self.clearMode = enabled
+
+    def mousePressEvent(self, event: QMouseEvent):   
+        if self.selectionMode and event.button() == Qt.MouseButton.LeftButton:
+            if not self.currentRect:
+                self.startPoint = self.mapToScene(event.pos())
+                self.currentRect = QGraphicsRectItem()
+                self.color = random.choices(self.BOX_COLORS)[0]
+                self.currentRect.setPen(QPen(QColor(*self.color), 1))
+                self.currentRect.setBrush(QColor(*self.color, 127))
+                self.picScene.addItem(self.currentRect)
+            else:
+                self.rectangles.append(self.currentRect)
+                self.currentRect = None
+        if self.clearMode and event.button() == Qt.MouseButton.LeftButton:
+            # 清除点击的矩形
+            for rect in self.rectangles:
+                if rect.rect().contains(self.mapToScene(event.pos())):
+                    self.picScene.removeItem(rect)
+                    self.rectangles.remove(rect)
+                    break
+
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self.selectionMode and self.currentRect:
+            endPoint = self.mapToScene(event.pos())
+            rect = QRectF(self.startPoint, endPoint).normalized()
+            self.currentRect.setRect(rect)
+        super().mouseMoveEvent(event)
+        
+
 class GraphicsPolygonItem(QGraphicsPolygonItem):
     """
     框图元
@@ -20,6 +73,8 @@ class GraphicsPolygonItem(QGraphicsPolygonItem):
     def __init__(self, points, index, parent, textList):
         super().__init__()
         # 识别结果的id
+        self.parent = parent
+        self.chosen = False
         self.index = index
         self.setAcceptHoverEvents(True)  # 启用悬停事件
         self.BOX_COLORS = [(82, 85, 255), (255, 130, 80), (240, 70, 255), (255, 255, 19), (30, 255, 30)]
@@ -56,6 +111,9 @@ class GraphicsPolygonItem(QGraphicsPolygonItem):
 
         return super().mouseReleaseEvent(event)
 
+    def set_brush(self, brushed):
+        self.chosen = brushed
+        signalBus.repaintSignal.emit()
 
 
     def paint(self, painter, option, widget):
@@ -68,8 +126,12 @@ class GraphicsPolygonItem(QGraphicsPolygonItem):
             option.state = QStyle.State_None
             self.textList.scrollToItem(self.textList.item(self.index), ListWidget.ScrollHint.PositionAtCenter)
             self.textList.setCurrentRow(self.index)
-
-            # self.signal.emit(self.index)
+        
+        if self.chosen:
+            painter.setBrush(QColor(*self.color, 127))
+            # 设置虚线样式， 间隔大一些
+            painter.setPen(QPen(QColor(*self.color), 1))
+            painter.drawPolygon(self.polygon)
         super().paint(painter, option, widget)
     
 class GraphicsImageItem(QGraphicsPixmapItem):
@@ -83,3 +145,7 @@ class GraphicsImageItem(QGraphicsPixmapItem):
         self.setPixmap(self.pix)
         # 加入图元
         parent.addItem(self)
+
+    
+
+    

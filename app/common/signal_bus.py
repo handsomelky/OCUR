@@ -7,9 +7,10 @@ class SignalBus(QObject):
 
     switchToSampleCard = Signal(str)
     micaEnableChanged = Signal(bool)
-    supportSignal = Signal()
     # 传递初始图像参数的信号
     initialImageSignal_part = Signal(list)
     initialImageSignal_full = Signal(list)
+
+    repaintSignal = Signal()
 
 signalBus = SignalBus()
