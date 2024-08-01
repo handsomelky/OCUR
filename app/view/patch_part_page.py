@@ -25,6 +25,8 @@ from ..components.graph_scene import GraphScene,GraphicsImageItem, GraphicsPolyg
 from ..api.patch import PatchThread
 from ..api.evaluate import EvaluateThread
 
+from ..utils.jsonTools import load_patch_info
+
 
 
 
@@ -187,7 +189,7 @@ class VisualizationArea(QWidget):
         self.zoomOutButton = TransparentToolButton(FIF.ZOOM_OUT, self.imageBar)
         self.selectButton = TransparentToggleToolButton(FIF.ADD, self.imageBar)
         self.clearButton = TransparentToggleToolButton(FIF.REMOVE, self.imageBar)
-        self.switchButton = ToggleButton(self.tr('Switch to Patched Image'),self.imageBar)
+        self.switchButton = ToggleButton(self.tr('Switch to Original Image'),self.imageBar)
         self.restoreButton = PrimaryPushButton(FIF.HISTORY,self.tr('Restore to Original Image'), self.imageBar)
         
         self.listClearButton = PushButton(Icon.TRUSH,self.tr('Clear'), self.textArea)
@@ -224,7 +226,7 @@ class VisualizationArea(QWidget):
         self.zoomOutButton.setToolTip('Zoom Out')
         self.selectButton.setToolTip('Select Mode')
         self.clearButton.setToolTip('Clear Mode')
-        self.switchButton.setToolTip('Switch to Patched Image')
+        self.switchButton.setToolTip('Switch to Original Image')
         self.restoreButton.setToolTip('Restore to Original Image')
         
 
@@ -406,7 +408,6 @@ class VisualizationArea(QWidget):
 
         self.viewer.view.setSceneRect(self.imageItem.boundingRect())  # 确保场景大小匹配图像大小
         self.viewer.view.fitInView(self.imageItem, Qt.KeepAspectRatio)
-        
 
     def updateText(self, texts):
         """
@@ -414,6 +415,8 @@ class VisualizationArea(QWidget):
         """
 
         self.textList.clear()
+        self.itemToGraphicsItem.clear()
+
         for text in texts:
             item = QListWidgetItem(self.textList)
             item.setTextAlignment(Qt.AlignVCenter | Qt.AlignLeft)
@@ -494,16 +497,17 @@ class VisualizationArea(QWidget):
     
     def switch_image(self, checked):
         if checked:
-            self.switchButton.setChecked(True)
-            self.switchButton.setEnabled(True)
-            self.switchButton.setText(self.tr('Switch to Original Image'))
-            self.patchedState = True
-        else:
             self.switchButton.setText(self.tr('Switch to Patched Image'))
             self.patchedState = False
-
-        item = self.indexList.currentItem()
-        self.show_result(item)
+            self.viewer.picScene.clear()
+            self.viewer.picScene.addPixmap(QPixmap(self.upload_file))
+            self.viewer.scale_factor = 1.0
+        else: 
+            self.switchButton.setText(self.tr('Switch to Original Image'))
+            self.patchedState = True
+            self.viewer.picScene.clear()
+            self.viewer.picScene.addPixmap(QPixmap(self.patched_img_path))
+            self.viewer.scale_factor = 1.0
 
 
 
@@ -533,7 +537,6 @@ class VisualizationArea(QWidget):
                 for coordinate in bbox:
                     for i in range(len(coordinate)):
                         coordinate[i] = int(coordinate[i])
-                print(bbox)
                 self.selectRects.append(bbox)
 
         if len(self.viewer.view.rectangles) != 0:
@@ -566,6 +569,8 @@ class VisualizationArea(QWidget):
     
     def show_patch(self, patched_img_path):
 
+        self.patched_img_path = patched_img_path
+
         self.textList.clear()
         self.viewer.picScene.clear()
         self.viewer.picScene.addPixmap(QPixmap(patched_img_path))
@@ -580,6 +585,8 @@ class VisualizationArea(QWidget):
         self.patchCheckedButton.setVisible(False)
         self.alreadyPatched = True
         self.patchedState = True
+        self.switchButton.setEnabled(True)
+
         
 
     
@@ -617,18 +624,18 @@ class VisualizationArea(QWidget):
     def show_result(self, result):
         if self.alreadyPatched:
             self.viewer.scale_factor = 1.0
-            upload_image_result = result[0]["ocr_result_clean"]
-            patched_image_result = result[0]["ocr_result_full"]
+            upload_image_result = result["ocr_result_clean"]
+            patched_image_result = result["ocr_result_full"]
 
             self.patchedState = True
 
             bboxs = patched_image_result["bbox"]
             texts = patched_image_result["texts"]
             self.updateText(texts)
-            self.updateView(bboxs, self.patched_dir+'/'+result[0]["image_name"])
+            self.updateView(bboxs, self.patched_dir+'/'+result["image_name"])
             
 
-            self.show_OCR(result[0])
+            self.show_OCR(result)
             self.ocrResultExpand.emit(True)
 
         else:
@@ -693,7 +700,7 @@ class VisualizationArea(QWidget):
 
 
 class ProtectArea(QWidget):
-    applyPatch = Signal(int, int)
+    applyPatch = Signal(int, str)
     evaluate = Signal(str)
     disableButtons = Signal()
     
@@ -701,6 +708,7 @@ class ProtectArea(QWidget):
         super().__init__(parent=parent)
         self.setObjectName('protectArea')
         self.base_path = base_path
+        self.patch_info_path = os.path.join(self.base_path, 'patches', 'patch.json')
 
         self.modelInfoActivated = False
 
@@ -755,21 +763,14 @@ class ProtectArea(QWidget):
     def __initWidget(self):
         self.initLayout()
 
+        self.updateStyleList()
+
         self.strenthButton.addItems([
             '25%',
             '50%',
             '75%',
             '100%'
         ])
-
-        self.styleButton.addItems([
-            self.styleButton.addItems([
-            self.tr('Generic Patch')+'1',
-            self.tr('Generic Patch')+'2',
-            self.tr('Generic Patch')+'3'
-        ])
-        ])
-
 
         self.previewPatchArea.setStyleSheet("""
             QFrame {
@@ -857,30 +858,30 @@ class ProtectArea(QWidget):
         self.evaluateLayout.addWidget(self.modelsettingArea,0)
         self.evaluateLayout.addWidget(self.modelInfoArea,0)
 
+    def updateStyleList(self):
+        self.patch_infos = load_patch_info(self.patch_info_path)["patches"]
+
+        for patch_info in self.patch_infos:
+            patch_name = patch_info["patch_name"]
+            self.styleButton.addItem(patch_name)
 
     def updatePreview(self):
-        self.strength = self.strenthButton.currentText()
-        style = self.styleButton.currentText()[-1]
 
-        strength_map = {
-            '100%': 100,
-            '75%': 75,
-            '50%': 50,
-            '25%': 25,
-        }
+        patch_name = self.styleButton.currentText()
 
+        for patch_info in self.patch_infos:
+            if patch_info["patch_name"] == patch_name:
+                priview_path= patch_info["patch_preview"]
+                break
 
-        self.file_suffix = strength_map[self.strength]
-        file_path = f":/gallery/images/patches/advpatch{style}_{self.file_suffix}.png"
-
-        pixmap = QPixmap(file_path)
+        pixmap = QPixmap(priview_path)
         self.previewPatch.setPixmap(pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio))
     
     def emitApplyPatchSignal(self):
         # 触发 applyPatch 信号的逻辑
         self.disableButtons.emit()
-        patch_strength = self.file_suffix
-        patch_style = int(self.styleButton.currentText()[-1])
+        patch_strength = int(self.strenthButton.currentText().replace('%', ''))
+        patch_style = self.styleButton.currentText()
         self.applyPatch.emit(patch_strength, patch_style)
 
     def savePatchedImage(self):

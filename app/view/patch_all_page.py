@@ -1,7 +1,9 @@
+from decimal import Decimal
 from PySide6.QtCore import QModelIndex, Qt, QObject, QEvent, Signal, QTimer, QSize, QPropertyAnimation, QEasingCurve
 from PySide6.QtGui import QPainter, QColor, QPixmap, QPen, QIcon, QFont
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFileDialog, QFrame, QGraphicsView, QListWidgetItem, QLabel, QGraphicsPixmapItem, QGraphicsScene, QScrollArea, QCompleter
 from PySide6.QtWebEngineWidgets import QWebEngineView
+from ..utils.jsonTools import load_patch_info
 
 from pyecharts.charts import Radar, Pie
 from pyecharts import options as opts
@@ -167,7 +169,7 @@ class VisualizationArea(QWidget):
     patchProgressUpdated = Signal(int)
     barchartExpand = Signal(bool)
     ocrResultExpand = Signal(bool)
-    updateChart = Signal(dict)
+    updateChart = Signal(tuple)
     enableButtons = Signal()
     saveornot = Signal(bool)
     ocrResult = Signal(list)
@@ -724,7 +726,7 @@ class VisualizationArea(QWidget):
 
         averages = self.calculate_averages(evaluate_results)
         categories = self.counter(evaluate_results)
-        data = [averages, categories]
+        data = (averages, categories)
         self.updateChart.emit(data)
 
         self.evaluatedState = True
@@ -769,12 +771,12 @@ class VisualizationArea(QWidget):
 
         # 保留两位小数
         avg_metrics = {
-            "P": round(sum(item["P"] for item in results) / total, 2),
-            "R": round(sum(item["R"] for item in results) / total, 2),
-            "F": round(sum(item["F"] for item in results) / total, 2),
-            "recognized_character_rate": round(sum(item["recognized_character_rate"] for item in results) / total, 2),
-            "attack_success_rate": round(sum(item["attack_success_rate"] for item in results) / total, 2),
-            "average_edit_distance": round(sum(item["average_edit_distance"] for item in results) / total, 2),
+            "P": round(Decimal(sum(item["P"] for item in results) / total), 4)*100,
+            "R": round(Decimal(sum(item["R"] for item in results) / total), 4)*100,
+            "F": round(Decimal(sum(item["F"] for item in results) / total), 4)*100,
+            "recognized_character_rate": round(Decimal(sum(item["recognized_character_rate"] for item in results) / total), 2),
+            "attack_success_rate": round(Decimal(sum(item["attack_success_rate"] for item in results) / total), 2),
+            "average_edit_distance": round(Decimal(sum(item["average_edit_distance"] for item in results) / total), 2),
         }
         return avg_metrics
 
@@ -838,7 +840,7 @@ class VisualizationArea(QWidget):
 
 
 class ProtectArea(QWidget):
-    applyPatch = Signal(int, int)
+    applyPatch = Signal(int, str)
     evaluate = Signal(str)
     disableButtons = Signal()
     
@@ -846,6 +848,7 @@ class ProtectArea(QWidget):
         super().__init__(parent=parent)
         self.setObjectName('protectArea')
         self.base_path = base_path
+        self.patch_info_path = os.path.join(self.base_path, 'patches', 'patch.json')
 
         self.modelInfoActivated = False
 
@@ -900,19 +903,14 @@ class ProtectArea(QWidget):
     def __initWidget(self):
         self.initLayout()
 
+        self.updateStyleList()
+
         self.strenthButton.addItems([
             '25%',
             '50%',
             '75%',
             '100%'
         ])
-
-        self.styleButton.addItems([
-            self.tr('Generic Patch')+'1',
-            self.tr('Generic Patch')+'2',
-            self.tr('Generic Patch')+'3'
-        ])
-
 
         self.previewPatchArea.setStyleSheet("""
             QFrame {
@@ -999,31 +997,31 @@ class ProtectArea(QWidget):
 
         self.evaluateLayout.addWidget(self.modelsettingArea,0)
         self.evaluateLayout.addWidget(self.modelInfoArea,0)
+    
+    def updateStyleList(self):
+        self.patch_infos = load_patch_info(self.patch_info_path)["patches"]
 
+        for patch_info in self.patch_infos:
+            patch_name = patch_info["patch_name"]
+            self.styleButton.addItem(patch_name)
 
     def updatePreview(self):
-        self.strength = self.strenthButton.currentText()
-        style = self.styleButton.currentText()[-1]
 
-        strength_map = {
-            '100%': 100,
-            '75%': 75,
-            '50%': 50,
-            '25%': 25,
-        }
+        patch_name = self.styleButton.currentText()
 
+        for patch_info in self.patch_infos:
+            if patch_info["patch_name"] == patch_name:
+                priview_path= patch_info["patch_preview"]
+                break
 
-        self.file_suffix = strength_map[self.strength]
-        file_path = f":/gallery/images/patches/advpatch{style}_{self.file_suffix}.png"
-
-        pixmap = QPixmap(file_path)
+        pixmap = QPixmap(priview_path)
         self.previewPatch.setPixmap(pixmap.scaled(80, 80, Qt.AspectRatioMode.KeepAspectRatio))
     
     def emitApplyPatchSignal(self):
         # 触发 applyPatch 信号的逻辑
         self.disableButtons.emit()
-        patch_strength = self.file_suffix
-        patch_style = int(self.styleButton.currentText()[-1])
+        patch_strength = int(self.strenthButton.currentText().replace('%', ''))
+        patch_style = self.styleButton.currentText()
         self.applyPatch.emit(patch_strength, patch_style)
 
     def savePatchedImage(self):
@@ -1185,7 +1183,7 @@ class ChartArea(QWidget):
     def __initWidget(self):
         self.initLayout()
 
-        self.chart1.setFixedWidth(430)
+        self.chart1.setFixedWidth(440)
         self.chart2.setFixedWidth(340)
 
         self.chart1.setContextMenuPolicy(Qt.NoContextMenu)
@@ -1215,11 +1213,11 @@ class ChartArea(QWidget):
         radar = Radar(init_opts=opts.InitOpts(width="420px", height="300px"))
         radar.add_schema(
             schema=[
-                opts.RadarIndicatorItem(name=self.tr("Precision"), max_=1),
-                opts.RadarIndicatorItem(name=self.tr("Recall"), max_=1),
-                opts.RadarIndicatorItem(name=self.tr("Hmean"), max_=1),
-                opts.RadarIndicatorItem(name=self.tr("Recognized Rate"), max_=100),
-                opts.RadarIndicatorItem(name=self.tr("Attack Success Rate"), max_=100),
+                opts.RadarIndicatorItem(name=self.tr("Precision")+"(%)", max_=100),
+                opts.RadarIndicatorItem(name=self.tr("Recall")+"(%)", max_=100),
+                opts.RadarIndicatorItem(name=self.tr("Hmean")+"(%)", max_=100),
+                opts.RadarIndicatorItem(name=self.tr("Recognized Rate")+"(%)", max_=100),
+                opts.RadarIndicatorItem(name=self.tr("Protect Success Rate")+"(%)", max_=100),
                 opts.RadarIndicatorItem(name=self.tr("Edit Distance"), max_=50)
             ],
             shape="circle",

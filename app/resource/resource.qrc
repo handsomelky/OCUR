@@ -141,21 +141,9 @@
         <file>images/Singer.png</file>
         <file>images/MusicNote.png</file>
         <file>images/Smiling_with_heart.png</file>
-
-        <file>images/patches/advpatch1_25.png</file>
-        <file>images/patches/advpatch1_50.png</file>
-        <file>images/patches/advpatch1_75.png</file>
-        <file>images/patches/advpatch1_100.png</file>
-
-        <file>images/patches/advpatch2_25.png</file>
-        <file>images/patches/advpatch2_50.png</file>
-        <file>images/patches/advpatch2_75.png</file>
-        <file>images/patches/advpatch2_100.png</file>
-
-        <file>images/patches/advpatch3_25.png</file>
-        <file>images/patches/advpatch3_50.png</file>
-        <file>images/patches/advpatch3_75.png</file>
-        <file>images/patches/advpatch3_100.png</file>
+        <file>images/patches/GenericPatch1_50.png</file>
+        <file>images/patches/GenericPatch2_50.png</file>
+        <file>images/patches/GenericPatch3_50.png</file>
 
         <file>qss/dark/home_interface.qss</file>
         <file>qss/dark/link_card.qss</file>

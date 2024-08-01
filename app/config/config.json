@@ -11,8 +11,8 @@
         "MicaEnabled": false
     },
     "Network": {
-        "ServiceIP": "{your backend's IP}",
-        "ServicePort": "{your backend's port}"
+        "ServiceIP": "119.91.40.61",
+        "ServicePort": "8030"
     },
     "QFluentWidgets": {
         "ThemeColor": "#ff009faa",

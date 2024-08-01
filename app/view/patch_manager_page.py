@@ -1,6 +1,6 @@
-from PySide6.QtCore import QModelIndex, Qt, QObject, QEvent, Signal, QTimer, QSize, QPropertyAnimation, QEasingCurve
+from PySide6.QtCore import QModelIndex, Qt, QObject, QEvent, Signal, QTimer, QSize, QAbstractItemModel
 from PySide6.QtGui import QPainter, QColor, QPixmap, QPen, QIcon
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QTableWidgetItem, QHeaderView, QStyle,QFrame, QLabel
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QTableWidgetItem, QHeaderView, QStyle,QFrame, QLabel, QFileDialog,QAbstractItemView
 from PySide6.QtWebEngineWidgets import QWebEngineView
 
 from pyecharts.charts import Radar, Pie
@@ -11,21 +11,25 @@ import shutil
 import sys
 from difflib import SequenceMatcher
 
-from qfluentwidgets import ScrollArea,  ImageLabel, StateToolTip, TableWidget, LineEdit, PrimaryToolButton
+from qfluentwidgets import ScrollArea,  ImageLabel, StateToolTip, TableWidget, LineEdit, PrimaryToolButton,ComboBox
 from qfluentwidgets import FluentIcon as FIF
 from ..common.config import cfg, HELP_URL, REPO_URL, EXAMPLE_URL, FEEDBACK_URL
 from ..common.icon import Icon, FluentIconBase
 from ..common.style_sheet import StyleSheet
 from ..common.signal_bus import signalBus
 
+from ..utils.jsonTools import save_patch_info, load_patch_info
 
-    
+from ..api.train import TrainThread
+
 
 
 class PatchTable(TableWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, base_path = None):
         super().__init__(parent=parent)
+        self.base_path = base_path
+        self.patch_info_path = os.path.join(self.base_path, 'patches', 'patch.json')
 
         self.__initWidget()
 
@@ -44,38 +48,17 @@ class PatchTable(TableWidget):
         
         self.verticalHeader().hide()
         self.setSortingEnabled(True)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
 
         self.setHorizontalHeaderLabels([
-            self.tr('Index'), self.tr('Preview'), self.tr('Name'), self.tr('Time'), self.tr('Max Strength'), self.tr('Effect')
+            self.tr('Index'), self.tr('Preview'), self.tr('Name'), self.tr('Time'), self.tr('Max Strength'), self.tr('Size')
         ])
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
-        initinfos = [
-            {
-                'patch_preview': ':/gallery/images/patches/advpatch1_50.png',
-                'patch_name': self.tr('Generic Patch')+'1',
-                'patch_time': '-',
-                'patch_strength': '100%',
-                'patch_effect': '-'
-            },
-            {
-                'patch_preview': ':/gallery/images/patches/advpatch2_50.png',
-                'patch_name': self.tr('Generic Patch')+'2',
-                'patch_time': '-',
-                'patch_strength': '100%',
-                'patch_effect': '-'
-            },
-            {
-                'patch_preview': ':/gallery/images/patches/advpatch3_50.png',
-                'patch_name': self.tr('Generic Patch')+'3',
-                'patch_time': '-',
-                'patch_strength': '100%',
-                'patch_effect': '-'
-            },
-        ]
+        initinfos = load_patch_info(self.patch_info_path)["patches"]
 
-        for i, patch_info in enumerate(initinfos):
+        for patch_info in initinfos:
             self.add_patch(patch_info)
 
     def add_patch(self, patch_info):
@@ -103,15 +86,18 @@ class PatchTable(TableWidget):
         name = QTableWidgetItem(patch_info['patch_name'])
         self.setItem(row, 2, name)
         self.item(row, 2).setTextAlignment(Qt.AlignCenter)
-
-        self.setItem(row, 3, QTableWidgetItem(patch_info['patch_time']))
+        time = QTableWidgetItem(patch_info['patch_time'])
+        self.setItem(row, 3, time)
         self.item(row, 3).setTextAlignment(Qt.AlignCenter)
-        self.setItem(row, 4, QTableWidgetItem(patch_info['patch_strength']))
+        strength = QTableWidgetItem(patch_info['patch_strength'])
+        self.setItem(row, 4, strength)
         self.item(row, 4).setTextAlignment(Qt.AlignCenter)
-        self.setItem(row, 5, QTableWidgetItem(patch_info['patch_effect']))
+        size = QTableWidgetItem(patch_info['patch_size'])
+        self.setItem(row, 5, size)
         self.item(row, 5).setTextAlignment(Qt.AlignCenter)
 
         self.setRowHeight(row, 80)
+
 
 
 
@@ -122,14 +108,22 @@ class PatchManagerPage(ScrollArea):
 
         self.view = QWidget(self)
         self.vBoxLayout = QVBoxLayout(self.view)
-        self.tableArea = PatchTable(self.view)
+        self.tableArea = PatchTable(self.view, base_path=base_path)
 
         self.trainArea = QFrame(self.view)
         self.trainAreaLayout = QHBoxLayout(self.trainArea)
 
         self.pathLabel = QLabel(self.tr('Select Train Dataset Directory'), self)
-        self.pathedit = LineEdit(self)
+        self.pathEdit = LineEdit(self)
         self.pathButton = PrimaryToolButton(FIF.FOLDER, self)
+        # 底纹尺寸选择
+        self.patchNameLabel = QLabel(self.tr('Patch Name'), self)
+        self.patchNameEdit = LineEdit(self)
+
+        self.sizeLabel = QLabel(self.tr('Patch Size'), self)
+        self.sizeButton = ComboBox(self)
+
+        self.trainLabel = QLabel(self.tr('Generate Patch'), self)
         self.trainButton = PrimaryToolButton(Icon.MODEL_TRAIN, self)
 
         self.__initWidget()
@@ -144,14 +138,25 @@ class PatchManagerPage(ScrollArea):
         self.setWidget(self.view)
         self.setWidgetResizable(True)
 
-        self.pathedit.setFixedWidth(150)
+        self.patchNameEdit.setFixedWidth(100)
+
+        self.pathEdit.setFixedWidth(150)
+
+        self.sizeButton.addItems([
+            '20',
+            '30',
+            '50',
+            '90'
+        ])
 
 
         self.connectSignalToSlot()
 
     def connectSignalToSlot(self):
 
-        pass
+        self.pathButton.clicked.connect(self.selectTrainDataset)
+        self.trainButton.clicked.connect(self.train)
+
 
     def initLayout(self):
         
@@ -161,14 +166,38 @@ class PatchManagerPage(ScrollArea):
         self.vBoxLayout.addSpacing(20)
         self.vBoxLayout.addWidget(self.trainArea, 1, Qt.AlignHCenter|Qt.AlignTop)
         self.trainArea.setFixedHeight(100)
-        self.trainAreaLayout.addWidget(self.pathLabel, 1, Qt.AlignCenter)
-        self.trainAreaLayout.addWidget(self.pathedit, 1, Qt.AlignCenter)
-        self.trainAreaLayout.addWidget(self.pathButton, 0, Qt.AlignCenter)
-        self.trainAreaLayout.addWidget(self.trainButton, 0, Qt.AlignCenter)
 
-        self.trainArea.setFixedWidth(500)
+        self.trainAreaLayout.addWidget(self.patchNameLabel, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.patchNameEdit, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.pathLabel, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.pathEdit, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.pathButton, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.sizeLabel, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.sizeButton, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.trainLabel, 1, Qt.AlignCenter)
+        self.trainAreaLayout.addWidget(self.trainButton, 1, Qt.AlignCenter)
 
         self.vBoxLayout.setContentsMargins(36, 0, 36, 0)
+
+    def selectTrainDataset(self):
+        folder = QFileDialog.getExistingDirectory(self, "Select Folder", "")
+        if folder:
+            self.pathEdit.setText(folder)
+            self.base_path = folder
+
+    def train(self):
+        train_dataset_dir = self.pathEdit.text()
+        size = int(self.sizeButton.currentText())
+        self.thread = TrainThread(train_dataset_dir, size=size, base_path=self.base_path)
+        self.thread.start()
+
+        
+
+
+
+
+
+    
 
     
 

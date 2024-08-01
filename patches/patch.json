@@ -1,0 +1,25 @@
+{
+    "patches": [
+        {
+            "patch_preview": ":/gallery/images/patches/GenericPatch1_50.png",
+            "patch_name": "GenericPatch1",
+            "patch_time": "-",
+            "patch_strength": "100%",
+            "patch_size": "30"
+        },
+        {
+            "patch_preview": ":/gallery/images/patches/GenericPatch2_50.png",
+            "patch_name": "GenericPatch2",
+            "patch_time": "-",
+            "patch_strength": "100%",
+            "patch_size": "30"
+        },
+        {
+            "patch_preview": ":/gallery/images/patches/GenericPatch3_50.png",
+            "patch_name": "GenericPatch3",
+            "patch_time": "-",
+            "patch_strength": "100%",
+            "patch_size": "30"
+        }
+    ]
+}

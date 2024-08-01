@@ -116,7 +116,7 @@ class EvaluateThread(QThread):
                 else:
                     self.progressFullUpdated.emit((processed_images / total_images) * 100)
             if self.is_Part:
-                self.evaluatePartCompleted.emit(evaluated_results)
+                self.evaluatePartCompleted.emit(evaluated_result)
             else:
                 self.evaluateFullCompleted.emit(evaluated_results)
         else:

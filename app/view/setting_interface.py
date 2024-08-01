@@ -32,7 +32,7 @@ class SettingInterface(ScrollArea):
             Icon.NETWORK,
             self.tr('Service IP'),
             self.tr('Set the IP address for the service'),
-            "{your default backend's IP}",
+            "119.91.40.61",
             cfg.serviceIP,
             parent=self.networkGroup
         )
@@ -40,7 +40,7 @@ class SettingInterface(ScrollArea):
             Icon.PORT,
             self.tr('Service Port'),
             self.tr('Set the port for the service'),
-            "{your default backend's port}",
+            '8030',
             cfg.servicePort,
             parent=self.networkGroup
         )

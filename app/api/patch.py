@@ -5,13 +5,14 @@ import requests
 from ..utils.ocrTools import _check_image_file, cv2_to_base64, base64_to_cv2
 from ..common.config import cfg
 from PySide6.QtCore import QThread, Signal
+import socket
 
 
 class PatchThread(QThread):
     progressFullUpdated = Signal(int)  # 用于更新进度
     patchFullCompleted = Signal(list)  # 用于补丁完成后发送结果
     progressPartUpdated = Signal(int)  # 用于更新部分进度
-    patchPartCompleted = Signal(dict)  # 用于部分补丁完成后发送结果
+    patchPartCompleted = Signal(str)  # 用于部分补丁完成后发送结果
 
 
     def __init__(self, file_paths, strength, style, ispart=False, bboxs=None, base_path=None):
@@ -23,9 +24,24 @@ class PatchThread(QThread):
         self.bboxs = bboxs
         self.base_path = base_path
 
-    def run(self):
+    def check_network_connection(self, host, port, timeout=5):
+        try:
+            socket.create_connection((host, port), timeout=timeout)
+            return True
+        except socket.error as err:
+            return False
 
-        url = f"http://{cfg.serviceIP.value}:{cfg.servicePort.value}/patch"
+    def run(self):
+        
+        host = cfg.serviceIP.value
+        port = cfg.servicePort.value
+        url = f"http://{host}:{port}/patch"
+
+        if not self.check_network_connection(host, port):
+            error_message = "无法连接到服务器，请检查网络连接或服务器配置。"
+            print(error_message)
+            return
+
         if self.ispart == False:
 
             patch_results = []  # List to store results from all images

@@ -7,14 +7,12 @@ from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from qfluentwidgets import FluentTranslator
 
-from app.common.signal_bus import signalBus
 
 import shutil
 
-
-
 from app.common.config import cfg
 from app.view.main_window import MainWindow
+
 
 def get_base_path():
     """获取可执行文件所在的目录"""
@@ -36,6 +34,13 @@ for check_dir in check_dirs:
     if os.path.exists(full_dir):
         shutil.rmtree(full_dir)
     os.makedirs(full_dir)
+
+# 生成patch文件，不存在则创建
+patch_dir = os.path.join(base_path, 'patches')
+if not os.path.exists(patch_dir):
+    os.makedirs(patch_dir)
+
+
 
 # enable dpi scale
 if cfg.get(cfg.dpiScale) != "Auto":

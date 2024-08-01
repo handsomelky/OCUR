@@ -59,8 +59,6 @@ EXAMPLE_URL = "http://119.91.40.61/guide/"
 FEEDBACK_URL = "https://github.com/handsomelky/OCUR/issues"
 RELEASE_URL = "https://github.com/handsomelky/OCUR/releases"
 
-
-
 cfg = Config()
 cfg.themeMode.value = Theme.AUTO
 qconfig.load('app/config/config.json', cfg)

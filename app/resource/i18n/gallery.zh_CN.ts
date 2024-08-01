@@ -321,8 +321,8 @@
     </message>
     <message>
         <location filename="../../view/patch_manager_page.py" line="51"/>
-        <source>Effect</source>
-        <translation>效果</translation>
+        <source>Size</source>
+        <translation>尺寸</translation>
     </message>
 </context>
 <context>
@@ -331,6 +331,21 @@
         <location filename="../../view/patch_manager_page.py" line="27"/>
         <source>Select Train Dataset Directory</source>
         <translation>选择训练集目录</translation>
+    </message>
+    <message>
+        <location filename="../../view/patch_manager_page.py" line="27"/>
+        <source>Patch Name</source>
+        <translation>底纹名称</translation>
+    </message>
+    <message>
+        <location filename="../../view/patch_manager_page.py" line="27"/>
+        <source>Patch Size</source>
+        <translation>底纹尺寸</translation>
+    </message>
+    <message>
+        <location filename="../../view/patch_manager_page.py" line="27"/>
+        <source>Generate Patch</source>
+        <translation>生成底纹</translation>
     </message>
 </context>
 <context>
@@ -503,11 +518,6 @@
     </message>
     <message>
         <location filename="../../view/patch_all_page.py" line="109"/>
-        <source>Generic Patch</source>
-        <translation>通用底纹</translation>
-    </message>
-    <message>
-        <location filename="../../view/patch_all_page.py" line="109"/>
         <source>Export Image</source>
         <translation>导出图像</translation>
     </message>
@@ -579,8 +589,8 @@
     </message>
     <message>
         <location filename="../../view/patch_all_page.py" line="27"/>
-        <source>Attack Success Rate</source>
-        <translation>攻击成功率</translation>
+        <source>Protect Success Rate</source>
+        <translation>保护成功率</translation>
     </message>
     <message>
         <location filename="../../view/patch_all_page.py" line="27"/>
